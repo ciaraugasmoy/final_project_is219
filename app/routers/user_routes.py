@@ -28,14 +28,74 @@ from app.dependencies import get_current_user, get_db, get_email_service, requir
 from app.schemas.pagination_schema import EnhancedPagination
 from app.schemas.token_schema import TokenResponse
 from app.schemas.user_schemas import LoginRequest, UserBase, UserCreate, UserListResponse, UserResponse, UserUpdate
-from app.services.user_service import UserService
+from app.services.user_service import *
 from app.services.jwt_service import create_access_token
 from app.utils.link_generation import create_user_links, generate_pagination_links
 from app.dependencies import get_settings
 from app.services.email_service import EmailService
+# 
+from fastapi.responses import HTMLResponse
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.future import select
+from sqlalchemy.orm import sessionmaker
+
+# 
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 settings = get_settings()
+from app.models.user_model import User
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse, FileResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.user_model import User  # Import the User model
+from app.services.user_service import UserService
+from app.schemas.user_schemas import UserCreate, UserUpdate
+from app.dependencies import get_db
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.user_service import UserService
+from app.models.user_model import User
+
+router = APIRouter()
+
+
+@router.get("/", response_class=FileResponse)
+async def get_index():
+    # Endpoint to serve the index page.
+    return "app/templates/index.html"
+
+
+@router.get("/profile/{user_id}", response_class=HTMLResponse)
+async def get_user_profile(request: Request, user_id: str):
+    # Fetch user data from the database based on user_id
+    user_data = await get_user(user_id)  # Use the appropriate method to fetch user data
+    
+    # Generate HTML content dynamically using string formatting or f-strings
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Profile</title>
+    </head>
+    <body>
+        <h1>User Profile</h1>
+        <p>User ID: {user_id}</p>
+        <p>Nickname: {nickname}</p>
+        <p>Bio: {bio}</p>
+        <!-- Add other user data fields here -->
+    </body>
+    </html>
+    """.format(user_id=user_data["id"], nickname=user_data["nickname"], bio=user_data["bio"])
+    
+    # Return an HTMLResponse with the dynamically generated HTML content
+    return HTMLResponse(content=html_content, status_code=200)
+
 @router.get("/users/{user_id}", response_model=UserResponse, name="get_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def get_user(user_id: UUID, request: Request, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
     """
@@ -329,15 +389,15 @@ async def update_github_profile(user_id: UUID, github_profile_url: str, db: Asyn
     return updated_user
 
 #professional update
-
 @router.put("/users/{user_id}/professional/", response_model=UserResponse, name="upgrade_to_professional", tags=["User Management Requires (Admin or Manager Roles)"])
-async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_db), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
+async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_db), email_service: EmailService = Depends(get_email_service), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
     """
     Upgrade a user to professional status.
 
     Args:
         user_id (UUID): The ID of the user to be upgraded.
         db (AsyncSession): The database session dependency.
+        email_service (EmailService): Dependency to provide email service.
         current_user (dict): The current authenticated user (must be an admin or manager).
 
     Returns:
@@ -353,6 +413,9 @@ async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_
     # Update the user's role to 'PROFESSIONAL'
     updated_user = await UserService.update(db, user_id, {"role": UserRole.PROFESSIONAL})
 
+    # Send notification email to the user
+    await send_professional_upgrade_notification(updated_user.email, str(updated_user.role), email_service)
+
     return UserResponse.model_construct(
         id=updated_user.id,
         nickname=updated_user.nickname,
@@ -367,5 +430,60 @@ async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_
         last_login_at=updated_user.last_login_at,
         created_at=updated_user.created_at,
         updated_at=updated_user.updated_at,
-        links=create_user_links(updated_user.id, request)  # Assuming you have a function to create HATEOAS links
+        links=create_user_links(updated_user.id, Request)  # Assuming you have a function to create HATEOAS links
     )
+
+
+
+
+
+# Method to fetch user ID by email
+async def get_user_id_by_email(db_session, email):
+    """
+    Fetches a user ID from the database based on the email.
+
+    Args:
+        db_session: The database session.
+        email (str): The email of the user to fetch.
+
+    Returns:
+        str: The user ID if found, else None.
+    """
+    user = await db_session.execute(select(User.id).filter(User.email == email))
+    user_id = user.scalar_one_or_none()  # Get the user ID or None if not found
+    return user_id
+
+# Example endpoint to demonstrate fetching user ID by email
+@router.get("/users/{email}/id")
+async def get_user_id(email: str, db: AsyncSession = Depends(get_db)):
+    """
+    Fetch user ID by email.
+
+    Args:
+        email (str): The email of the user.
+
+    Returns:
+        str: The user ID.
+    """
+    user_id = await get_user_id_by_email(db, email)
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_id": user_id}
+
+async def send_professional_upgrade_notification(user_email: str, new_role: str, email_service: EmailService):
+    """
+    Sends a notification email to the user when their professional status is upgraded.
+
+    Args:
+        user_email (str): The email address of the user.
+        new_role (str): The new role of the user (e.g., 'PROFESSIONAL').
+        email_service (EmailService): An instance of the EmailService.
+    """
+    subject = "Professional Status Upgrade Notification"
+    message = f"Hello,\n\nYour user account has been upgraded to {new_role}.\n\nThank you for using our platform."
+    
+    try:
+        await email_service.send_email(user_email, subject, message)
+    except Exception as e:
+        # Handle any exceptions that might occur during email sending
+        print(f"Failed to send email notification to {user_email}: {str(e)}")
