@@ -199,3 +199,57 @@ class UserService:
             await session.commit()
             return True
         return False
+
+    @classmethod
+    async def update_profile_picture(cls, session: AsyncSession, user_id: UUID, profile_picture_url: str) -> Optional[User]:
+        """
+        Update user's profile picture URL.
+
+        Args:
+            session (AsyncSession): The database session dependency.
+            user_id (UUID): The ID of the user to update.
+            profile_picture_url (str): New profile picture URL.
+
+        Returns:
+            Optional[User]: The updated user object if successful, None otherwise.
+        """
+        try:
+            user = await cls.get_by_id(session, user_id)
+            if user:
+                user.profile_picture_url = profile_picture_url
+                await session.commit()
+                return user
+            else:
+                logger.error(f"User with ID {user_id} not found.")
+                return None
+        except Exception as e:
+            logger.error(f"Error updating profile picture for user {user_id}: {e}")
+            await session.rollback()
+            return None
+
+    @classmethod
+    async def update_github_profile(cls, session: AsyncSession, user_id: UUID, github_profile_url: str) -> Optional[User]:
+        """
+        Update user's GitHub profile URL.
+
+        Args:
+            session (AsyncSession): The database session dependency.
+            user_id (UUID): The ID of the user to update.
+            github_profile_url (str): New GitHub profile URL.
+
+        Returns:
+            Optional[User]: The updated user object if successful, None otherwise.
+        """
+        try:
+            user = await cls.get_by_id(session, user_id)
+            if user:
+                user.github_profile_url = github_profile_url
+                await session.commit()
+                return user
+            else:
+                logger.error(f"User with ID {user_id} not found.")
+                return None
+        except Exception as e:
+            logger.error(f"Error updating GitHub profile for user {user_id}: {e}")
+            await session.rollback()
+            return None
