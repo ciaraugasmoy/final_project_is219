@@ -327,3 +327,45 @@ async def update_github_profile(user_id: UUID, github_profile_url: str, db: Asyn
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     return updated_user
+
+#professional update
+
+@router.put("/users/{user_id}/professional/", response_model=UserResponse, name="upgrade_to_professional", tags=["User Management Requires (Admin or Manager Roles)"])
+async def upgrade_to_professional(user_id: UUID, db: AsyncSession = Depends(get_db), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
+    """
+    Upgrade a user to professional status.
+
+    Args:
+        user_id (UUID): The ID of the user to be upgraded.
+        db (AsyncSession): The database session dependency.
+        current_user (dict): The current authenticated user (must be an admin or manager).
+
+    Returns:
+        UserResponse: The updated user details with the professional role.
+
+    Raises:
+        HTTPException: If the user is not found or the current user is not authorized.
+    """
+    user = await UserService.get_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Update the user's role to 'PROFESSIONAL'
+    updated_user = await UserService.update(db, user_id, {"role": UserRole.PROFESSIONAL})
+
+    return UserResponse.model_construct(
+        id=updated_user.id,
+        nickname=updated_user.nickname,
+        first_name=updated_user.first_name,
+        last_name=updated_user.last_name,
+        bio=updated_user.bio,
+        profile_picture_url=updated_user.profile_picture_url,
+        github_profile_url=updated_user.github_profile_url,
+        linkedin_profile_url=updated_user.linkedin_profile_url,
+        role=updated_user.role,
+        email=updated_user.email,
+        last_login_at=updated_user.last_login_at,
+        created_at=updated_user.created_at,
+        updated_at=updated_user.updated_at,
+        links=create_user_links(updated_user.id, request)  # Assuming you have a function to create HATEOAS links
+    )
