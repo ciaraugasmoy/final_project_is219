@@ -1,5 +1,5 @@
 # Define a base stage
-FROM python:3.12.2-slim-bullseye as base
+FROM python:3.12-slim-bullseye as base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -15,6 +15,7 @@ WORKDIR /myapp
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
+    libc-bin=2.31-13+deb11u10 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +27,7 @@ RUN python -m venv /.venv \
     && pip install -r requirements.txt
 
 # Define a second stage for the runtime
-FROM python:3.12.2-slim-bullseye as final
+FROM python:3.12-slim-bullseye as final
 
 # Copy the virtual environment from the base stage
 COPY --from=base /.venv /.venv
