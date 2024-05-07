@@ -245,3 +245,85 @@ async def verify_email(user_id: UUID, token: str, db: AsyncSession = Depends(get
     if await UserService.verify_email_with_token(db, user_id, token):
         return {"message": "Email verified successfully"}
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+@router.put("/users/{user_id}/nickname/", response_model=UserUpdate, tags=["User Profile"])
+async def update_nickname(user_id: UUID, nickname: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's nickname.
+    - **user_id**: UUID of the user to update.
+    - **nickname**: New nickname.
+    """
+    updated_user = await UserService.update_nickname(db, user_id, nickname)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
+
+@router.put("/users/{user_id}/bio/", response_model=UserUpdate, tags=["User Profile"])
+async def update_bio(user_id: UUID, bio: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's biography.
+    - **user_id**: UUID of the user to update.
+    - **bio**: New biography.
+    """
+    updated_user = await UserService.update_bio(db, user_id, bio)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
+
+@router.put("/users/{user_id}/location/", response_model=UserUpdate, tags=["User Profile"])
+async def update_location(user_id: UUID, location: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's location.
+
+    - **user_id**: UUID of the user to update.
+    - **location**: New location.
+    """
+    updated_user = await UserService.update_location(db, user_id, location)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
+
+@router.put("/users/{user_id}/profile-picture/", response_model=UserUpdate, tags=["User Profile"])
+async def update_profile_picture(user_id: UUID, profile_picture_url: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's profile picture URL.
+
+    - **user_id**: UUID of the user to update.
+    - **profile_picture_url**: New profile picture URL.
+    """
+    updated_user = await UserService.update_profile_picture(db, user_id, profile_picture_url)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
+
+@router.put("/users/{user_id}/linkedin-profile/", response_model=UserUpdate, tags=["User Profile"])
+async def update_linkedin_profile(user_id: UUID, linkedin_profile_url: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's LinkedIn profile URL.
+
+    - **user_id**: UUID of the user to update.
+    - **linkedin_profile_url**: New LinkedIn profile URL.
+    """
+    updated_user = await UserService.update_linkedin_profile(db, user_id, linkedin_profile_url)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
+
+@router.put("/users/{user_id}/github-profile/", response_model=UserUpdate, tags=["User Profile"])
+async def update_github_profile(user_id: UUID, github_profile_url: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update user's GitHub profile URL.
+
+    - **user_id**: UUID of the user to update.
+    - **github_profile_url**: New GitHub profile URL.
+    """
+    updated_user = await UserService.update_github_profile(db, user_id, github_profile_url)
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    return updated_user
