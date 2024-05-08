@@ -11,14 +11,17 @@
   - Update the user profile page to display the professional status and allow users to edit their profile fields.
     ![APIENDPOINTS](userprofile.PNG)
   - Send notifications to users when their professional status is upgraded.
-
+11  new tests total
 the following tests were created
 4 TESTS
 https://github.com/ciaraugasmoy/final_project_is219/commit/267634df06d36bb4de54cfb0112c0b2fea22e126
+
 4 TESTS
 https://github.com/ciaraugasmoy/final_project_is219/commit/07d02a01969295b4de32791a5de428ac58811cd6
+
 2 TESTS
 https://github.com/ciaraugasmoy/final_project_is219/commit/bd83cf3032da4f7fa9be53a864dacfa62fcc4c3b
+
 1 TEST
 https://github.com/ciaraugasmoy/final_project_is219/commit/b39394c1c1705e5e1206728deb78f7413f65ea76
 
