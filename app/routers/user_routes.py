@@ -63,38 +63,21 @@ from app.models.user_model import User
 router = APIRouter()
 
 
+@router.get("/loginpage/", response_class=FileResponse)
+async def get_index():
+    # Endpoint to serve the index page.
+    return "app/templates/login.html"
+
 @router.get("/", response_class=FileResponse)
 async def get_index():
     # Endpoint to serve the index page.
-    return "app/templates/index.html"
+    return "app/templates/register.html"
 
 
-@router.get("/profile/{user_id}", response_class=HTMLResponse)
+@router.get("/profile/{user_id}", response_class=FileResponse)
 async def get_user_profile(request: Request, user_id: str):
     # Fetch user data from the database based on user_id
-    user_data = await get_user(user_id)  # Use the appropriate method to fetch user data
-    
-    # Generate HTML content dynamically using string formatting or f-strings
-    html_content = """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>User Profile</title>
-    </head>
-    <body>
-        <h1>User Profile</h1>
-        <p>User ID: {user_id}</p>
-        <p>Nickname: {nickname}</p>
-        <p>Bio: {bio}</p>
-        <!-- Add other user data fields here -->
-    </body>
-    </html>
-    """.format(user_id=user_data["id"], nickname=user_data["nickname"], bio=user_data["bio"])
-    
-    # Return an HTMLResponse with the dynamically generated HTML content
-    return HTMLResponse(content=html_content, status_code=200)
+    return "app/templates/index.html"
 
 @router.get("/users/{user_id}", response_model=UserResponse, name="get_user", tags=["User Management Requires (Admin or Manager Roles)"])
 async def get_user(user_id: UUID, request: Request, db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
