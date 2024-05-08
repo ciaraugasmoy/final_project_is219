@@ -1,5 +1,5 @@
 # Define a base stage with a Debian Bookworm base image that includes the latest glibc update
-FROM python:3.12-slim-bookworm as base
+FROM python:latest as base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
