@@ -190,3 +190,13 @@ async def test_list_users_unauthorized(async_client, user_token):
         headers={"Authorization": f"Bearer {user_token}"}
     )
     assert response.status_code == 403  # Forbidden, as expected for regular user
+
+
+# Test case for fetching user's nickname
+@pytest.mark.asyncio
+async def test_get_user_nickname(async_client: AsyncClient, admin_token: str, admin_user: User):
+    response = await async_client.get(f"/users/{admin_user.id}/nickname", headers={"Authorization": f"Bearer {admin_token}"})
+    assert response.status_code == 200
+    nickname_data = response.json()
+    assert "nickname" in nickname_data
+
