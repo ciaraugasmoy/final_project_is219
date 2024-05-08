@@ -192,7 +192,7 @@ async def test_list_users_unauthorized(async_client, user_token):
     assert response.status_code == 403  # Forbidden, as expected for regular user
 
 
-# Test case for fetching user's nickname
+# Test case for fetching user's nickname ######################################
 @pytest.mark.asyncio
 async def test_get_user_nickname(async_client: AsyncClient, admin_token: str, admin_user: User):
     response = await async_client.get(f"/users/{admin_user.id}/nickname", headers={"Authorization": f"Bearer {admin_token}"})
@@ -200,3 +200,33 @@ async def test_get_user_nickname(async_client: AsyncClient, admin_token: str, ad
     nickname_data = response.json()
     assert "nickname" in nickname_data
 
+
+
+
+@pytest.mark.asyncio
+async def test_get_login_page(async_client):
+    response = await async_client.get("/loginpage/")
+    assert response.status_code == 200
+    assert response.url.path == "/loginpage/"
+
+@pytest.mark.asyncio
+async def test_get_register_page(async_client):
+    response = await async_client.get("/")
+    assert response.status_code == 200
+    assert response.url.path == "/"
+
+
+@pytest.mark.asyncio
+async def test_upgrade_to_professional_unauthorized(async_client, user_token, verified_user):
+    url = f"/users/{verified_user.id}/professional/"
+    headers = {"Authorization": f"Bearer {user_token}"}
+    response = await async_client.put(url, headers=headers)
+    assert response.status_code == 403  # Forbidden
+
+@pytest.mark.asyncio
+async def test_upgrade_to_professional_user_not_found(async_client, admin_token):
+    invalid_user_id = "00000000-0000-0000-0000-000000000000"
+    url = f"/users/{invalid_user_id}/professional/"
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    response = await async_client.put(url, headers=headers)
+    assert response.status_code == 404
