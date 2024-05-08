@@ -200,9 +200,6 @@ async def test_get_user_nickname(async_client: AsyncClient, admin_token: str, ad
     nickname_data = response.json()
     assert "nickname" in nickname_data
 
-
-
-
 @pytest.mark.asyncio
 async def test_get_login_page(async_client):
     response = await async_client.get("/loginpage/")
@@ -214,7 +211,6 @@ async def test_get_register_page(async_client):
     response = await async_client.get("/")
     assert response.status_code == 200
     assert response.url.path == "/"
-
 
 @pytest.mark.asyncio
 async def test_upgrade_to_professional_unauthorized(async_client, user_token, verified_user):
