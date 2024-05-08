@@ -63,19 +63,18 @@ from app.models.user_model import User
 router = APIRouter()
 
 
-@router.get("/loginpage/", response_class=FileResponse)
-async def get_index():
-    # Endpoint to serve the index page.
+@router.get("/loginpage/", response_class=FileResponse, tags=["Login and Registration"])
+async def get_login_page():
+    # Endpoint to serve the LOGIN PAGE
     return "app/templates/login.html"
 
-@router.get("/", response_class=FileResponse)
-async def get_index():
-    # Endpoint to serve the index page.
+@router.get("/", response_class=FileResponse, tags=["Login and Registration"])
+async def get_register_page():
+    # Endpoint to serve the REGISTER PAGE
     return "app/templates/register.html"
 
-
-@router.get("/profile/{user_id}", response_class=FileResponse)
-async def get_user_profile(request: Request, user_id: str):
+@router.get("/profile/{user_id}", response_class=FileResponse, tags=["User Profile"])
+async def get_user_profile_page(request: Request, user_id: str):
     # Fetch user data from the database based on user_id
     return "app/templates/index.html"
 
@@ -470,3 +469,78 @@ async def send_professional_upgrade_notification(user_email: str, new_role: str,
     except Exception as e:
         # Handle any exceptions that might occur during email sending
         print(f"Failed to send email notification to {user_email}: {str(e)}")
+
+
+# Get user's nickname
+@router.get("/users/{user_id}/nickname", tags=["User Profile"])
+async def get_user_nickname(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's nickname by ID.
+    """
+    user = await db.execute(select(User.nickname).filter(User.id == user_id))
+    nickname = user.scalar_one_or_none()
+    if not nickname:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"nickname": nickname}
+
+# Get user's bio
+@router.get("/users/{user_id}/bio", tags=["User Profile"])
+async def get_user_bio(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's bio by ID.
+    """
+    user = await db.execute(select(User.bio).filter(User.id == user_id))
+    bio = user.scalar_one_or_none()
+    if not bio:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"bio": bio}
+
+# Get user's location
+@router.get("/users/{user_id}/location", tags=["User Profile"])
+async def get_user_location(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's location by ID.
+    """
+    user = await db.execute(select(User.location).filter(User.id == user_id))
+    location = user.scalar_one_or_none()
+    if not location:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"location": location}
+
+# Get user's profile picture URL
+@router.get("/users/{user_id}/profile-picture", tags=["User Profile"])
+async def get_user_profile_picture(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's profile picture URL by ID.
+    """
+    user = await db.execute(select(User.profile_picture_url).filter(User.id == user_id))
+    profile_picture_url = user.scalar_one_or_none()
+    if not profile_picture_url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"profile_picture_url": profile_picture_url}
+
+# Get user's LinkedIn profile URL
+@router.get("/users/{user_id}/linkedin-profile", tags=["User Profile"])
+async def get_user_linkedin_profile(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's LinkedIn profile URL by ID.
+    """
+    user = await db.execute(select(User.linkedin_profile_url).filter(User.id == user_id))
+    linkedin_profile_url = user.scalar_one_or_none()
+    if not linkedin_profile_url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"linkedin_profile_url": linkedin_profile_url}
+
+# Get user's GitHub profile URL
+@router.get("/users/{user_id}/github-profile", tags=["User Profile"])
+async def get_user_github_profile(user_id: UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get user's GitHub profile URL by ID.
+    """
+    user = await db.execute(select(User.github_profile_url).filter(User.id == user_id))
+    github_profile_url = user.scalar_one_or_none()
+    if not github_profile_url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return {"github_profile_url": github_profile_url}
+
+
