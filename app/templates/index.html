@@ -14,12 +14,12 @@
         <h1 class="text-3xl font-bold mb-6">User Profile</h1>
         <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold mb-4">Profile Information</h2>
-            <p class="mb-2"><span class="font-semibold">User ID:</span> <span id="user-id"></span></p>
-            <p class="mb-2"><span class="font-semibold">Nickname:</span> <span id="nickname"></span></p>
-            <p class="mb-2"><span class="font-semibold">Bio:</span> <span id="bio"></span></p>
-            <p class="mb-2"><span class="font-semibold">Profile Picture:</span> <img id="profile-picture" src="" alt="Profile Picture" class="w-20 h-20 rounded-full"></p>
-            <p class="mb-2"><span class="font-semibold">GitHub Profile:</span> <a id="github-profile" href="#" target="_blank" class="text-blue-500">GitHub</a></p>
-            <p class="mb-4"><span class="font-semibold">Professional Status:</span> <span id="role"></span></p>
+            <p class="mb-2"><span class="font-semibold">User ID:</span> <span id="user-id">123e4567-e89b-12d3-a456-426614174000</span></p>
+            <p class="mb-2"><span class="font-semibold">Nickname:</span> <span id="nickname">JohnDoe</span></p>
+            <p class="mb-2"><span class="font-semibold">Bio:</span> <span id="bio">Software engineer with a passion for coding and problem-solving.</span></p>
+            <p class="mb-2"><span class="font-semibold">Profile Picture:</span> <img id="profile-picture" src="https://via.placeholder.com/150" alt="Profile Picture" class="w-20 h-20 rounded-full"></p>
+            <p class="mb-2"><span class="font-semibold">GitHub Profile:</span> <a id="github-profile" href="https://github.com/johndoe" target="_blank" class="text-blue-500">GitHub</a></p>
+            <p class="mb-4"><span class="font-semibold">Professional Status:</span> <span id="role">PROFESSIONAL</span></p>
             <button id="edit-profile" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit Profile</button>
         </div>
 
@@ -28,41 +28,25 @@
             <form id="edit-form" class="bg-white rounded-lg shadow-md p-6">
                 <div class="mb-4">
                     <label for="nickname-input" class="block font-semibold">Nickname:</label>
-                    <input type="text" id="nickname-input" name="nickname" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="nickname-input" name="nickname" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="JohnDoe">
                 </div>
                 <div class="mb-4">
                     <label for="bio-input" class="block font-semibold">Bio:</label>
-                    <textarea id="bio-input" name="bio" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <textarea id="bio-input" name="bio" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">Software engineer with a passion for coding and problem-solving.</textarea>
                 </div>
                 <div class="mb-4">
                     <label for="profile-picture-input" class="block font-semibold">Profile Picture URL:</label>
-                    <input type="text" id="profile-picture-input" name="profile-picture-url" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="profile-picture-input" name="profile-picture-url" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="https://via.placeholder.com/150">
                 </div>
                 <div class="mb-4">
                     <label for="github-profile-input" class="block font-semibold">GitHub Profile URL:</label>
-                    <input type="text" id="github-profile-input" name="github-profile-url" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="github-profile-input" name="github-profile-url" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" value="https://github.com/johndoe">
                 </div>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Save Changes</button>
             </form>
         </div>
     </div>
     <script>
-        // Get user ID from cookie
-        const userId = getCookieValue('user_id');
-
-        // Fetch user profile data
-        fetch(`/profile/${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('user-id').textContent = data.user_id;
-                document.getElementById('nickname').textContent = data.nickname;
-                document.getElementById('bio').textContent = data.bio;
-                document.getElementById('profile-picture').src = data.profile_picture_url;
-                document.getElementById('github-profile').href = data.github_profile_url;
-                document.getElementById('role').textContent = data.role;
-            })
-            .catch(error => console.error('Error fetching user profile:', error));
-
         // Show/hide edit form
         const editProfileButton = document.getElementById('edit-profile');
         const editForm = document.querySelector('.edit-form');
@@ -80,73 +64,17 @@
             const profilePictureUrl = formData.get('profile-picture-url');
             const githubProfileUrl = formData.get('github-profile-url');
 
-            // Send PUT request to update user profile
-            fetch(`/users/${userId}/nickname/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ nickname })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('nickname').textContent = data.nickname;
-                console.log('Nickname updated successfully');
-            })
-            .catch(error => console.error('Error updating nickname:', error));
-
-            fetch(`/users/${userId}/bio/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ bio })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('bio').textContent = data.bio;
-                console.log('Bio updated successfully');
-            })
-            .catch(error => console.error('Error updating bio:', error));
-
-            fetch(`/users/${userId}/profile-picture/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ profile_picture_url: profilePictureUrl })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('profile-picture').src = data.profile_picture_url;
-                console.log('Profile picture updated successfully');
-            })
-            .catch(error => console.error('Error updating profile picture:', error));
-
-            fetch(`/users/${userId}/github-profile/`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ github_profile_url: githubProfileUrl })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('github-profile').href = data.github_profile_url;
-                console.log('GitHub profile updated successfully');
-            })
-            .catch(error => console.error('Error updating GitHub profile:', error));
+            // Update the UI with the new values
+            document.getElementById('nickname').textContent = nickname;
+            document.getElementById('bio').textContent = bio;
+            document.getElementById('profile-picture').src = profilePictureUrl;
+            document.getElementById('github-profile').href = githubProfileUrl;
 
             // Hide the edit form
             editForm.style.display = 'none';
-        });
 
-        // Helper function to get cookie value
-        function getCookieValue(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
+            console.log('Profile updated successfully');
+        });
     </script>
 </body>
 </html>
