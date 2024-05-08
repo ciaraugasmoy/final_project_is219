@@ -15,6 +15,7 @@ from uuid import UUID
 from app.services.email_service import EmailService
 from app.models.user_model import UserRole
 import logging
+import re
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -199,3 +200,49 @@ class UserService:
             await session.commit()
             return True
         return False
+
+    @classmethod
+    async def update_github_profile(cls, session: AsyncSession, user_id: UUID, github_profile_url: str) -> Optional[User]:
+        # Validate the GitHub profile URL format
+        if not re.match(r"https?://(?:www\.)?github\.com/[\w-]+/?", github_profile_url):
+            logger.error("Invalid GitHub profile URL format.")
+            return None
+        
+        # Continue updating the user profile
+        try:
+            query = update(User).where(User.id == user_id).values(github_profile_url=github_profile_url).execution_options(synchronize_session="fetch")
+            await cls._execute_query(session, query)
+            updated_user = await cls.get_by_id(session, user_id)
+            if updated_user:
+                session.refresh(updated_user)  # Explicitly refresh the updated user object
+                logger.info(f"GitHub profile URL updated successfully for user {user_id}.")
+                return updated_user
+            else:
+                logger.error(f"User {user_id} not found after update attempt.")
+            return None
+        except Exception as e:  # Broad exception handling for debugging
+            logger.error(f"Error during GitHub profile URL update: {e}")
+            return None
+
+    @classmethod
+    async def update_profile_picture(cls, session: AsyncSession, user_id: UUID, profile_picture_url: str) -> Optional[User]:
+        # Validate the profile picture URL format
+        if not re.match(r"https://", profile_picture_url):
+            logger.error("Invalid profile picture URL format.")
+            return None
+        
+        # Continue updating the user profile
+        try:
+            query = update(User).where(User.id == user_id).values(profile_picture_url=profile_picture_url).execution_options(synchronize_session="fetch")
+            await cls._execute_query(session, query)
+            updated_user = await cls.get_by_id(session, user_id)
+            if updated_user:
+                session.refresh(updated_user)  # Explicitly refresh the updated user object
+                logger.info(f"Profile picture URL updated successfully for user {user_id}.")
+                return updated_user
+            else:
+                logger.error(f"User {user_id} not found after update attempt.")
+            return None
+        except Exception as e:  # Broad exception handling for debugging
+            logger.error(f"Error during profile picture URL update: {e}")
+            return None

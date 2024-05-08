@@ -161,3 +161,29 @@ async def test_unlock_user_account(db_session, locked_user):
     assert unlocked, "The account should be unlocked"
     refreshed_user = await UserService.get_by_id(db_session, locked_user.id)
     assert not refreshed_user.is_locked, "The user should no longer be locked"
+
+# Test updating a user's GitHub profile URL with valid data
+async def test_update_github_profile_valid_data(db_session, user):
+    new_github_profile_url = "https://github.com/example_user"
+    updated_user = await UserService.update_github_profile(db_session, user.id, new_github_profile_url)
+    assert updated_user is not None
+    assert updated_user.github_profile_url == new_github_profile_url
+
+# Test updating a user's GitHub profile URL with invalid data
+async def test_update_github_profile_invalid_data(db_session, user):
+    invalid_github_profile_url = "invalid_github_url"  # Invalid GitHub profile URL
+    updated_user = await UserService.update_github_profile(db_session, user.id, invalid_github_profile_url)
+    assert updated_user is None
+
+# Test updating a user's profile picture with valid data
+async def test_update_profile_picture_valid_data(db_session, user):
+    new_profile_picture_url = "https://example.com/new_profile_picture.jpg"
+    updated_user = await UserService.update_profile_picture(db_session, user.id, new_profile_picture_url)
+    assert updated_user is not None
+    assert updated_user.profile_picture_url == new_profile_picture_url
+
+# Test updating a user's profile picture with invalid data
+async def test_update_profile_picture_invalid_data(db_session, user):
+    invalid_profile_picture_url = "invalid_profile_picture_url"  # Invalid profile picture URL
+    updated_user = await UserService.update_profile_picture(db_session, user.id, invalid_profile_picture_url)
+    assert updated_user is None

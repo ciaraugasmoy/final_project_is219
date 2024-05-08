@@ -108,3 +108,29 @@ def test_user_base_url_invalid(url, user_base_data):
     user_base_data["profile_picture_url"] = url
     with pytest.raises(ValidationError):
         UserBase(**user_base_data)
+
+# new tests
+@pytest.mark.parametrize("email", ["test@example.com", "user123@gmail.com", "john.doe@example.co.uk"])
+def test_user_base_email_valid(email, user_base_data):
+    user_base_data["email"] = email
+    user = UserBase(**user_base_data)
+    assert user.email == email
+
+@pytest.mark.parametrize("email", ["invalid_email", "test@.com", "user@com", "user@invalid"])
+def test_user_base_email_invalid(email, user_base_data):
+    user_base_data["email"] = email
+    with pytest.raises(ValidationError):
+        UserBase(**user_base_data)
+
+# Parametrized tests for email validation
+@pytest.mark.parametrize("email", ["test@example.com", "user123@gmail.com", "john.doe@example.co.uk"])
+def test_user_base_email_valid(email, user_base_data):
+    user_base_data["email"] = email
+    user = UserBase(**user_base_data)
+    assert user.email == email
+
+@pytest.mark.parametrize("email", ["invalid_email", "test@.com", "user@com", "user@invalid"])
+def test_user_base_email_invalid(email, user_base_data):
+    user_base_data["email"] = email
+    with pytest.raises(ValidationError):
+        UserBase(**user_base_data)
