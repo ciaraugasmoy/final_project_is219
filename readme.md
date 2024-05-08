@@ -4,12 +4,12 @@
 - **User Story:** As a user, I want to be able to manage my profile information and get upgraded to professional status by managers or admins.
 - **Minimum Viable Feature:**
   - Implement API endpoints for users to update their profile fields, such as name, bio, location, etc.
-    ![APIENDPOINTS](apiroutes.PNG)
-     ![APIENDPOINTS](userprofile2.PNG)
+    ![APIENDPOINTS](demo/apiroutes.PNG)
+     ![APIENDPOINTS](demo/userprofile2.PNG)
   - Create a separate API endpoint for managers and admins to upgrade a user to professional status.
-    ![APIENDPOINTS](apiroutes2.PNG)
+    ![APIENDPOINTS](demo/apiroutes2.PNG)
   - Update the user profile page to display the professional status and allow users to edit their profile fields.
-    ![APIENDPOINTS](userprofile.PNG)
+    ![APIENDPOINTS](demo/userprofile.PNG)
   - Send notifications to users when their professional status is upgraded.
  
 11  new tests total
